@@ -1,5 +1,22 @@
 import tensorflow as tf
 
+
+class DenseEncoder(tf.keras.Model):
+	def __init__(self, output_dim, dropout=0.1):
+		super(DenseEncoder, self).__init__()
+		self.dense = tf.keras.Sequential([
+			tf.keras.layers.Dense(
+				output_dim, activation='relu',
+			),
+			tf.keras.layers.BatchNormalization(),
+			tf.keras.layers.Dropout(dropout),
+		])
+
+	def call(self, x):
+		x = self.dense(x)
+		return x
+
+
 class Resnet50Encoder(tf.keras.layers.Layer):
 	def __init__(self, input_shape, num_classes, **kwargs):
 		super(Resnet50Encoder, self).__init__(**kwargs)
