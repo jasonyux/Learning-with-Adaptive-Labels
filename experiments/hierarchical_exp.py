@@ -276,6 +276,7 @@ if __name__ == "__main__":
 		)
 		print(f'using LabelEmbed_Model')
 	else:
+		assert(latent_dim == num_labels)
 		model = ClassificationModel(image_encoder, num_labels)
 
 

@@ -29,7 +29,9 @@ Text Datasets:
 - [Yelp-Polarity-Reviews](https://www.tensorflow.org/datasets/catalog/yelp_polarity_reviews)
 
 ### Dataset Preprocessing
-We mostly only saved the datasets into relevant folders under the `datasets` folder, so that python files in `experiments` can easily access the datasets. Nevertheless, we provide examples of how to process the datasets in the `data_preprocessing.ipynb` file.
+We mostly only saved the datasets into relevant folders under the `datasets` folder, so that python files in `experiments` can easily access the datasets. 
+
+Since this usually invovles downloading large files, we provide examples of how to process the datasets in the `data_preprocessing.ipynb` file, so that you can choose only to process/download the datasets you want to test.
 
 ## Architectures
 

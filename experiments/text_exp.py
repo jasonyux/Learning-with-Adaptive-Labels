@@ -19,14 +19,14 @@ from algorithms.staticlabel import StaticLabel_Model
 
 CONFIG = {
 	"dataset": {
-		"name": "cifar10", # ["imdb_reviews", "yelp_polarity_reviews"]
-		"num_labels": 10, # [2, 2]	
+		"name": "imdb_reviews", # ["imdb_reviews", "yelp_polarity_reviews"]
+		"num_labels": 2, # [2, 2]
 	},
 	"model": {
 		"encoder": "simple_dense",
 		"algo": 'lwal', #["std", "staticlabel", "lwr", "label_embed", "lwal"]
-		"rloss": "cos_repel_loss_z", # ["cos_repel_loss_z", "none"]
-		"latent_dim": 100, # num_labels for normal algorithms, 10 * num_labels for LwAL10, 768 for StaticLabel
+		"rloss": "none", # ["cos_repel_loss_z", "none"]
+		"latent_dim": 2, # num_labels for normal algorithms, 10 * num_labels for LwAL10, 768 for StaticLabel
 		"stationary_steps": 1, # used by LwAL
 		"warmup_steps": 0, # [0, 2, 5] for LwAL
 		"k": 5, # [2, 3, 5] for LWR
@@ -57,22 +57,12 @@ if __name__ == "__main__":
 
 	seed = CONFIG['seed']
 
-	if encoder != "efficientnet": # efficientnet does not support determinstic algos up to Aug 2022
-		set_global_determinism()
+	set_global_determinism()
 	set_seeds(seed)
 	print(f"Using {json.dumps(CONFIG, indent=4)}")
 
 	### Prepare daraloaders
 	x_train, y_train, x_test, y_test = sample_data(CONFIG)
-	if len(x_train.shape) == 3:
-		x_train = x_train[:,:,:,None]
-		x_test = x_test[:,:,:,None]
-	
-	if x_train.shape[-1] == 1:
-		x_train = grey_to_rgb(x_train)
-		x_test = grey_to_rgb(x_test)
-	
-	img_shape = x_train[0].shape
 
 	batch_size = num_labels * 50
 	if algo == "lwr": # lwr needs data index
