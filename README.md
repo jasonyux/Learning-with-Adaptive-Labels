@@ -1,6 +1,6 @@
 # Learning with Adaptive Labels
 
-This is an implementation of the paper (archiv link here when available).
+This is an implementation of the paper [Improving Model Training via Self-learned Label Representations](https://arxiv.org/pdf/2209.04528.pdf).
 
 ## Project Layout
 ```bash
