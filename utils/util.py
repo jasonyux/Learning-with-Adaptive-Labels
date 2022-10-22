@@ -43,16 +43,16 @@ def compute_centroids(z, in_y, num_classes=10):
 	return tf.stack(centroids)
 
 
-def update_learnt_centroids(learnt_y, centroids):
+def update_learnt_centroids(learnt_y, centroids, decay_factor=1.0):
 	latent_dim = learnt_y.shape[1] 
 	num_classes = learnt_y.shape[0] # this is always correct
 	new_learnt_y = []
 	for i in range(num_classes):
 		enc_y = centroids[i]
-		if enc_y is None:
-			new_learnt_y.append(tf.zeros([latent_dim], dtype=tf.float32))
-		else:
-			new_learnt_y.append(enc_y)
+		if tf.math.count_nonzero(enc_y) == 0: # check if all zero
+			enc_y = learnt_y[i]
+		new_enc_y = decay_factor * enc_y + (1 - decay_factor) * learnt_y[i]
+		new_learnt_y.append(new_enc_y)
 	return tf.stack(new_learnt_y)
 
 

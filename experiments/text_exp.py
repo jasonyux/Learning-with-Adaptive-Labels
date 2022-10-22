@@ -7,6 +7,7 @@ import numpy as np
 import json
 import tensorflow as tf
 
+from typing import Dict, Any
 from utils.util import sample_data, set_seeds, set_global_determinism, grey_to_rgb
 from utils.initializers import INIT_LABELS_FUNC
 from algorithms.encoders import *
@@ -17,7 +18,7 @@ from algorithms.lwal import LwAL_Model
 from algorithms.staticlabel import StaticLabel_Model
 
 
-CONFIG = {
+CONFIG: Dict[str, Any] = {
 	"dataset": {
 		"name": "imdb_reviews", # ["imdb_reviews", "yelp_polarity_reviews"]
 		"num_labels": 2, # [2, 2]
