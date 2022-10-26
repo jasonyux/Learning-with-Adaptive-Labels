@@ -3,6 +3,8 @@ import numpy as np
 import os
 import random
 
+from utils.constants import *
+
 
 def set_seeds(seed):
 	os.environ['PYTHONHASHSEED'] = str(seed)
@@ -86,3 +88,45 @@ def sample_data(config):
 	y_test = test_dset["y"]
 
 	return x_train, y_train, x_test, y_test
+
+
+def to_onehot(y, num_classes):
+	y_onehot = np.zeros((len(y), num_classes))
+	y_onehot[np.arange(len(y)), y] = 1
+	return y_onehot
+
+
+def __resplit_data(x_train, y_train, x_test, y_test, combined_class_ids):
+	x_in_train = x_train[np.isin(np.argmax(y_train, axis=1), combined_class_ids)]
+	y_in_train = y_train[np.isin(np.argmax(y_train, axis=1), combined_class_ids)]
+	y_in_reformated_train = []
+	for new_i in np.argmax(y_in_train, axis=1): # convert to 23 dimensional labels
+		y_in_reformated_train.append(combined_class_ids.index(new_i))
+	y_in_train = to_onehot(y_in_reformated_train, len(combined_class_ids))
+
+	x_in_test = x_test[np.isin(np.argmax(y_test, axis=1), combined_class_ids)]
+	y_in_test = y_test[np.isin(np.argmax(y_test, axis=1), combined_class_ids)]
+	y_in_reformated_test = []
+	for new_i in np.argmax(y_in_test, axis=1):
+		y_in_reformated_test.append(combined_class_ids.index(new_i))
+	y_in_test = to_onehot(y_in_reformated_test, len(combined_class_ids))
+	return x_in_train, y_in_train, x_in_test, y_in_test
+
+
+def resplit_data(config, x_train, y_train, x_test, y_test):
+	"""used specifically when doing the hierarchy prediction task, as it involves some
+	special split of the data and it only includes a few datasets (cifar10, awa2, and 20newsgroup)
+	"""
+	dset_name = config["dataset"]["name"]
+	if dset_name == "cifar10":
+		# do nothing because all classes have its mapping in wordnet
+		return x_train, y_train, x_test, y_test
+	elif dset_name == "awa2_n_precomputed":
+		combined_class_ids = list(AWA2_MAPPABLE_TRAIN_LABELS.keys()) + list(AWA2_MAPPABLE_TEST_LABELS.keys())
+		x_in_train, y_in_train, x_in_test, y_in_test = __resplit_data(x_train, y_train, x_test, y_test, combined_class_ids)
+		return x_in_train, y_in_train, x_in_test, y_in_test
+	elif dset_name == "fashion_mnist":
+		class_ids = list(FMNIST_MAPPABLE_LABELS.keys())
+		x_in_train, y_in_train, x_in_test, y_in_test = __resplit_data(x_train, y_train, x_test, y_test, class_ids)
+		return x_in_train, y_in_train, x_in_test, y_in_test
+	return # error

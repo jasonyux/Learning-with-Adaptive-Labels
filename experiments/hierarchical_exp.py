@@ -8,7 +8,7 @@ import json
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-from utils.util import sample_data, set_seeds, set_global_determinism, grey_to_rgb, pairwise_dist
+from utils.util import sample_data, resplit_data, set_seeds, set_global_determinism, grey_to_rgb, pairwise_dist
 from utils.initializers import INIT_LABELS_FUNC
 from utils.constants import *
 from nltk.corpus import wordnet as wn
@@ -29,7 +29,7 @@ CONFIG = {
 	"dataset": {
 		"name": "cifar10", "num_labels": 10, 'text_labels': list(CIFAR10_LABELS.values()),
 		# "name": "awa2_n_precomputed", "num_labels": 23, 'text_labels': list(AWA2_MAPPABLE_TRAIN_LABELS.values()) + list(AWA2_MAPPABLE_TEST_LABELS.values()),
-		# "name": "fashion_mnist", "num_labels": 8, 'text_labels': list(FMNIST_MAPPABLE_LABELS.values()},
+		# "name": "fashion_mnist", "num_labels": 8, 'text_labels': list(FMNIST_MAPPABLE_LABELS.values())
 	},
 	"model": {
 		"encoder": "resnet50",
@@ -197,6 +197,10 @@ def compute_dist_from_similarity_matrix(similarity_matrix):
 if __name__ == "__main__":	
 	dset_name = CONFIG['dataset']['name']
 	num_labels = CONFIG['dataset']['num_labels']
+	if dset_name == "awa2_n_precomputed":
+		CONFIG['dataset']['num_labels'] = 50 # so that we sample the correct file
+	elif dset_name == "fashion_mnist":
+		CONFIG['dataset']['num_labels'] = 10
 	precomputed_features = CONFIG["dataset"]["name"] == "awa2_n_precomputed"
 	text_labels  = CONFIG['dataset']['text_labels']
 
@@ -227,6 +231,7 @@ if __name__ == "__main__":
 	if x_train.shape[-1] == 1:
 		x_train = grey_to_rgb(x_train)
 		x_test = grey_to_rgb(x_test)
+	x_train, y_train, x_test, y_test = resplit_data(CONFIG, x_train, y_train, x_test, y_test)
 	
 	img_shape = x_train[0].shape
 
@@ -256,7 +261,6 @@ if __name__ == "__main__":
 			rloss=rloss)
 		print(f'using {algo} and initialized {init_learnt_y.shape=}')
 	elif algo == "lwr":
-		assert(latent_dim == num_labels)
 		model = LWR_Model(
 			image_encoder,
 			output_dim=num_labels,
@@ -267,7 +271,6 @@ if __name__ == "__main__":
 		)
 		print(f'using LWR_Model')
 	elif algo == "label_embed":
-		assert(latent_dim == num_labels)
 		model  = LabelEmbed_Model(
 			encoder = image_encoder,
 			output_dim = num_labels,
@@ -276,7 +279,6 @@ if __name__ == "__main__":
 		)
 		print(f'using LabelEmbed_Model')
 	else:
-		assert(latent_dim == num_labels)
 		model = ClassificationModel(image_encoder, num_labels)
 
 
